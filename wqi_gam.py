@@ -49,9 +49,9 @@ variables_numeric = ["od_mg",
                       "fos",
                       "sil",
                       "cl_tot",
-                      "cl_act",
+                      # "cl_act",
                       "nitri",
-                      "sal",
+                      # "sal",
                       "ac"
                     ] 
 
@@ -152,183 +152,184 @@ for ssn in df.season.unique():
     
 aux = df.groupby("season").describe().T
 
-# %%
+# %% version nueva
 
-for ssn in df.season.unique():
     
-    data = df.where(df.season == ssn).dropna(how="all")[variables_numeric]
-    
-    print('----------------------')
-    print(f"Media de cada variable {ssn}")
-    print('----------------------')
-    print(data.mean(axis=0))
-    
-    print('-------------------------')
-    print(f'Varianza de cada variable {ssn}')
-    print('-------------------------')
-    print(data.var(axis=0))
-    data.dropna(how="any", inplace=True)
-    
-    # Entrenamiento modelo PCA con escalado de los datos
-    # ==============================================================================
-    pca_pipe = make_pipeline(StandardScaler(), PCA())
-    pca_pipe.fit(data)
-    
-    # Se extrae el modelo entrenado del pipeline
-    modelo_pca = pca_pipe.named_steps['pca']
-    
-    # dataframe de los loadings
-    df_pca = pd.DataFrame(
-                data    = modelo_pca.components_,
-                columns = data.columns,
-                index   = ['PC1',
-                           'PC2',
-                           'PC3',
-                           'PC4',
-                           'PC5',
-                           'PC6',
-                           'PC7',
-                           'PC8',
-                           'PC9']
-                )
-    
-    # % Heatmap componentes
-    # ==============================================================================
-    plt.rcParams["font.size"] = 5
-    fig, ax = plt.subplots(dpi=300,
-                           nrows=1,
-                           ncols=1,
-                           figsize=(4, 2)
-                           )
-    
-    componentes = modelo_pca.components_
-    # plt.imshow(componentes.T,
-    #            cmap='viridis',
-    #            aspect='auto'
-    #            )
-    
-    sns.heatmap(componentes.T,
-                cmap="BrBG",
-                # cbar_kws={'fontsize': 5,},
-                linewidths=.3,
-                annot=True,
-                fmt = ".2g",
-                ax=ax,
-                annot_kws={'size': 5,},
-                vmin=-1,
-                vmax=1,
-                )
-    
-    
-    plt.yticks(range(len(data.columns)),
-               data.columns,
-               fontsize=5,
-               rotation=0,
-               )
-    
-    plt.xticks(range(len(data.columns)),
-               np.arange(modelo_pca.n_components_) + 1,
-               fontsize=5,
-               )
-    
-    ax.set_xlabel("Componentes",
-                  fontsize=5,)
-    
-    plt.grid(False)
-    # plt.colorbar();
-    
-    # % Porcentaje de varianza explicada por cada componente
-    # ==============================================================================
-    print('----------------------------------------------------')
-    print(f'Porcentaje de varianza explicada por cada componente {ssn}')
-    print('----------------------------------------------------')
-    print(modelo_pca.explained_variance_ratio_)
-    
-    fig, ax = plt.subplots(dpi=300,
-                           nrows=1,
-                           ncols=1,
-                           figsize=(6, 4)
-                           )
-    ax.bar(x = np.arange(modelo_pca.n_components_) + 1,
-           height = modelo_pca.explained_variance_ratio_
-           )
-    
-    for x, y in zip(np.arange(len(data.columns)) + 1,
-                    modelo_pca.explained_variance_ratio_):
-        label = round(y, 2)
-        ax.annotate(
-                    label,
-                    (x,y),
-                    textcoords="offset points",
-                    xytext=(0,10),
-                    ha='center'
-                    )       
-    
-    ax.set_xticks(np.arange(modelo_pca.n_components_) + 1)
-    ax.set_ylim(0, 1.1)
-    ax.set_title(f'Porcentaje de varianza explicada por cada componente {ssn}')
-    ax.set_xlabel('Componente principal')
-    ax.set_ylabel('% varianza explicada');
-    
-    # Porcentaje de varianza explicada acumulada
-    # ==============================================================================
-    prop_varianza_acum = modelo_pca.explained_variance_ratio_.cumsum()
-    print('------------------------------------------')
-    print(f'% de varianza explicada acumulada {ssn}')
-    print('------------------------------------------')
-    print(prop_varianza_acum)
-    
-    fig, ax = plt.subplots(dpi=300,
-                           nrows=1,
-                           ncols=1,
-                           figsize=(6, 4)
-                           )
-    ax.plot(
-            np.arange(len(data.columns)) + 1,
-            prop_varianza_acum,
-            marker = 'o'
+data = df[variables_numeric].dropna()
+
+print('----------------------')
+print(f"Media de cada variable {ssn}")
+print('----------------------')
+print(data.mean(axis=0))
+
+print('-------------------------')
+print(f'Varianza de cada variable {ssn}')
+print('-------------------------')
+print(data.var(axis=0))
+data.dropna(how="any", inplace=True)
+
+# Entrenamiento modelo PCA con escalado de los datos
+# ==============================================================================
+pca_pipe = make_pipeline(StandardScaler(), PCA())
+pca_pipe.fit(data)
+
+# Se extrae el modelo entrenado del pipeline
+modelo_pca = pca_pipe.named_steps['pca']
+
+# dataframe de los loadings
+df_pca = pd.DataFrame(
+            data    = modelo_pca.components_,
+            columns = data.columns,
+            index   = ['PC1',
+                       'PC2',
+                       'PC3',
+                       'PC4',
+                       'PC5',
+                       'PC6',
+                       'PC7',
+                       # 'PC8',
+                       # 'PC9']
+                       ]
             )
+
+# % Heatmap componentes
+# ==============================================================================
+plt.rcParams["font.size"] = 5
+fig, ax = plt.subplots(dpi=300,
+                       nrows=1,
+                       ncols=1,
+                       figsize=(4, 2)
+                       )
+
+componentes = modelo_pca.components_
+# plt.imshow(componentes.T,
+#            cmap='viridis',
+#            aspect='auto'
+#            )
+
+sns.heatmap(componentes.T,
+            cmap="BrBG",
+            # cbar_kws={'fontsize': 5,},
+            linewidths=.3,
+            annot=True,
+            fmt = ".2g",
+            ax=ax,
+            annot_kws={'size': 5,},
+            vmin=-1,
+            vmax=1,
+            )
+
+
+plt.yticks(range(len(data.columns)),
+           data.columns,
+           fontsize=5,
+           rotation=0,
+           )
+
+plt.xticks(range(len(data.columns)),
+           np.arange(modelo_pca.n_components_) + 1,
+           fontsize=5,
+           )
+
+ax.set_xlabel("Componentes",
+              fontsize=5,)
+
+plt.grid(False)
+# plt.colorbar();
+
+# % Porcentaje de varianza explicada por cada componente
+# ==============================================================================
+print('----------------------------------------------------')
+print(f'Porcentaje de varianza explicada por cada componente {ssn}')
+print('----------------------------------------------------')
+print(modelo_pca.explained_variance_ratio_)
+
+fig, ax = plt.subplots(dpi=300,
+                       nrows=1,
+                       ncols=1,
+                       figsize=(6, 4)
+                       )
+ax.bar(x = np.arange(modelo_pca.n_components_) + 1,
+       height = modelo_pca.explained_variance_ratio_
+       )
+
+for x, y in zip(np.arange(len(data.columns)) + 1,
+                modelo_pca.explained_variance_ratio_):
+    label = round(y, 2)
+    ax.annotate(
+                label,
+                (x,y),
+                textcoords="offset points",
+                xytext=(0,10),
+                ha='center'
+                )       
+
+ax.set_xticks(np.arange(modelo_pca.n_components_) + 1)
+ax.set_ylim(0, 1.1)
+ax.set_title(f'Porcentaje de varianza explicada por cada componente {ssn}')
+ax.set_xlabel('Componente principal')
+ax.set_ylabel('% varianza explicada');
+
+# Porcentaje de varianza explicada acumulada
+# ==============================================================================
+prop_varianza_acum = modelo_pca.explained_variance_ratio_.cumsum()
+print('------------------------------------------')
+print(f'% de varianza explicada acumulada {ssn}')
+print('------------------------------------------')
+print(prop_varianza_acum)
+
+fig, ax = plt.subplots(dpi=300,
+                       nrows=1,
+                       ncols=1,
+                       figsize=(6, 4)
+                       )
+ax.plot(
+        np.arange(len(data.columns)) + 1,
+        prop_varianza_acum,
+        marker = 'o'
+        )
+
+for x, y in zip(np.arange(len(data.columns)) + 1, prop_varianza_acum):
+    label = round(y, 2)
+    ax.annotate(
+                label,
+                (x,y),
+                textcoords="offset points",
+                xytext=(0,10),
+                ha='center'
+                )
     
-    for x, y in zip(np.arange(len(data.columns)) + 1, prop_varianza_acum):
-        label = round(y, 2)
-        ax.annotate(
-                    label,
-                    (x,y),
-                    textcoords="offset points",
-                    xytext=(0,10),
-                    ha='center'
-                    )
-        
-    ax.set_ylim(0, 1.1)
-    ax.set_xticks(np.arange(modelo_pca.n_components_) + 1)
-    ax.set_title(f'Porcentaje de varianza explicada acumulada {ssn}')
-    ax.set_xlabel('Componente principal')
-    ax.set_ylabel('% varianza acumulada');
-    
-    # Proyección de las observaciones de entrenamiento
-    # ==============================================================================
-    proyecciones = pca_pipe.transform(X=data)
-    proyecciones = pd.DataFrame(
-        proyecciones,
-        columns = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', 'PC8', "PC9"],
-        index   = data.index
-    )
-    proyecciones.head()
-    
-    # Recostruccion de las proyecciones
-    # ==============================================================================
-    recostruccion = pca_pipe.inverse_transform(proyecciones)
-    recostruccion = pd.DataFrame(
-                        recostruccion,
-                        columns = data.columns,
-                        index   = data.index
-    )
-    # print('------------------')
-    # print('Valores originales')
-    # print('------------------')
-    # print(recostruccion.head())
-    
-    # print('---------------------')
-    # print('Valores reconstruidos')
-    # print('---------------------')
-    # print(data.head())
+ax.set_ylim(0, 1.1)
+ax.set_xticks(np.arange(modelo_pca.n_components_) + 1)
+ax.set_title(f'Porcentaje de varianza explicada acumulada {ssn}')
+ax.set_xlabel('Componente principal')
+ax.set_ylabel('% varianza acumulada');
+
+# Proyección de las observaciones de entrenamiento
+# ==============================================================================
+proyecciones = pca_pipe.transform(X=data)
+proyecciones = pd.DataFrame(
+    proyecciones,
+    columns = ['PC1', 'PC2', 'PC3', 'PC4', 'PC5', 'PC6', 'PC7', ],
+               # 'PC8', "PC9"],
+    index   = data.index
+)
+proyecciones.head()
+
+# Recostruccion de las proyecciones
+# ==============================================================================
+recostruccion = pca_pipe.inverse_transform(proyecciones)
+recostruccion = pd.DataFrame(
+                    recostruccion,
+                    columns = data.columns,
+                    index   = data.index
+)
+# print('------------------')
+# print('Valores originales')
+# print('------------------')
+# print(recostruccion.head())
+
+# print('---------------------')
+# print('Valores reconstruidos')
+# print('---------------------')
+# print(data.head())
